@@ -22,7 +22,7 @@
 #include "systems/data_exporter.h"
 #include "field_solver_sph_1d.h"
 #include "field_solver_sph_1d_impl.hpp"
-// #include "systems/gather_tracked_ptc.h"
+#include "systems/gather_tracked_ptc.h"
 #include "grid_sph_1d.hpp"
 #include "coord_policy_spherical_1d.hpp"
 // #include "systems/policies/coord_policy_spherical_sync_cooling.hpp"
@@ -46,8 +46,8 @@ main(int argc, char *argv[]) {
   auto pusher = env.register_system<ptc_updater<Conf, exec_policy_dynamic,
                                       // coord_policy_spherical_sync_cooling>>(
           coord_policy_spherical_1d>>(grid, &comm);
-  // auto tracker =
-  //     env.register_system<gather_tracked_ptc<Conf, exec_policy_dynamic>>(grid);
+  auto tracker =
+      env.register_system<gather_tracked_ptc<Conf, exec_policy_dynamic>>(grid);
   auto moments =
       env.register_system<compute_moments<Conf, exec_policy_dynamic>>(grid);
   auto solver = env.register_system<
