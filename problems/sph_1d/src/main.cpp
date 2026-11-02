@@ -78,11 +78,13 @@ main(int argc, char *argv[]) {
   float kT = 1.0e-3;
   float rho0 = 0.0;
   int ppc = 0;
+  bool moving_inject = false;
   env.params().get_value("Bp", Bp);
-  env.params().get_value("ppc", ppc);
   env.params().get_value("q_e", q_e);
   env.params().get_value("kT", kT);
   env.params().get_value("rho0", rho0);
+  env.params().get_value("ppc", ppc);
+  env.params().get_value("moving_inject", moving_inject);
 
   // Set dipole initial magnetic field
   B0->set_values(0, [Bp](Scalar x, Scalar theta, Scalar phi) {
@@ -95,7 +97,8 @@ main(int argc, char *argv[]) {
     return Bp / cube(r);
   });
 
-  // Fill the magnetosphere with pairs
+  // Fill the magnetosphere with pairs (unless this will be done in the boundary conditoin)
+  if (!moving_inject) {
   ptc_injector_dynamic<Conf> injector(grid);
   injector.inject_pairs(
       [] LAMBDA(auto &pos, auto &grid, auto &ext) { return true; },
@@ -107,7 +110,7 @@ main(int argc, char *argv[]) {
         auto r = grid_sph_1d_t<Conf>::radius(x_global[0]);
         return rho0 / q_e / ppc / r;
       });
-
+    }
   env.run();
 
   return 0;
