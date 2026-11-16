@@ -111,23 +111,46 @@ field_solver<Conf, ExecPolicy,
   field_solver_base<Conf>::register_data_components_impl(type);
 }
 
+// template <typename Conf, template <class> class ExecPolicy>
+// void
+// field_solver<Conf, ExecPolicy, coord_policy_spherical_1d>::update_explicit(
+//     double dt, double time) {
+//   if (time < TINY)
+//     compute_b_update_explicit(*(this->B), *(this->E), 0.5 * dt);
+//   else
+//     compute_b_update_explicit(*(this->B), *(this->E), dt);
+
+//   // Communicate B guard cells
+//   if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->B));
+
+//   compute_e_update_explicit(*(this->E), *(this->B), *(this->J), dt);
+
+//   // Communicate E guard cells
+//   if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->E));
+
+//   // apply coordinate boundary condition
+//   if (this->m_comm == nullptr || this->m_comm->domain_info().is_boundary[1]) {
+//     damping_boundary<Conf, ExecPolicy>(*(this->E), *(this->B), m_damping_length,
+//                                        m_damping_coef);
+//   }
+// }
+
 template <typename Conf, template <class> class ExecPolicy>
 void
 field_solver<Conf, ExecPolicy, coord_policy_spherical_1d>::update_explicit(
     double dt, double time) {
-  if (time < TINY)
-    compute_b_update_explicit(*(this->B), *(this->E), 0.5 * dt);
-  else
-    compute_b_update_explicit(*(this->B), *(this->E), dt);
-
+  compute_b_update_explicit(*(this->B), *(this->E), 0.5 * dt);
   // Communicate B guard cells
   if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->B));
 
   compute_e_update_explicit(*(this->E), *(this->B), *(this->J), dt);
-
   // Communicate E guard cells
   if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->E));
 
+  compute_b_update_explicit(*(this->B), *(this->E), 0.5 * dt);
+  // Communicate B guard cells
+  if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->B));
+  
   // apply coordinate boundary condition
   if (this->m_comm == nullptr || this->m_comm->domain_info().is_boundary[1]) {
     damping_boundary<Conf, ExecPolicy>(*(this->E), *(this->B), m_damping_length,
