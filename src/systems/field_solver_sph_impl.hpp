@@ -313,20 +313,17 @@ template <typename Conf, template <class> class ExecPolicy>
 void
 field_solver<Conf, ExecPolicy, coord_policy_spherical>::update_explicit(
     double dt, double time) {
-  if (time < TINY)
-    compute_b_update_explicit(*(this->B), *(this->E), 0.5 * dt);
-  else
-    compute_b_update_explicit(*(this->B), *(this->E), dt);
-
-  // Communicate B guard cells
+  compute_b_update_explicit(*(this->B), *(this->E), 0.5 * dt);
   if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->B));
   axis_boundary_b<Conf, ExecPolicy>(*(this->B), m_grid_sph);
 
   compute_e_update_explicit(*(this->E), *(this->B), *(this->J), dt);
   axis_boundary_e<Conf, ExecPolicy>(*(this->E), m_grid_sph);
-
-  // Communicate E guard cells
   if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->E));
+
+  compute_b_update_explicit(*(this->B), *(this->E), 0.5 * dt);
+  if (this->m_comm != nullptr) this->m_comm->send_guard_cells(*(this->B));
+  axis_boundary_b<Conf, ExecPolicy>(*(this->B), m_grid_sph);
 
   // apply coordinate boundary condition
   if (this->m_comm == nullptr || this->m_comm->domain_info().is_boundary[1]) {
